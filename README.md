@@ -36,7 +36,105 @@ Trade-off: Sacrifices independent scaling for simplicity and correctness.
 ### 005: Persistence
 
 Chosen: PostgreSQL / relational database
-Why: Strong relational model and transactions fit order/payment correctness requirements.
+Why: Strong relational model and We don't need NoSQL's typical strengths like highly flexible schemas or massive distributed write scaling.
 Alternative: NoSQL / in-memory
 Trade-off: More schema management, but substantially stronger consistency guarantees.
 
+### 006: Payment Concurrency
+
+Decision: Protect the specific order row during payment validation and creation.
+Chosen: Row-level protection inside a transaction.
+Why: Prevents concurrent payments for the same order from bypassing the over-payment invariant.
+Alternative: Atomic database constraint/update without explicit row locking.
+Trade-off: Slightly more locking, but simpler correctness reasoning for this assignment.
+
+
+### 007: Currency
+
+Decision: Use a single fixed currency for the application. Assuming Dollar as currency
+Why: Removes ambiguity while avoiding unnecessary multi-currency complexity.
+Alternative: Support currency per order.
+Trade-off: Less flexibility, significantly simpler financial model.
+
+### 008: Money Representation
+
+Decision: Use USD represented as integer cents.
+Why: Exact arithmetic, simple comparisons, and fast operations without floating-point precision issues.
+Alternative: Use a high-precision decimal/money library to represent monetary values.
+Trade-off: Integer cents is simpler and faster for this assignment; a precision library would provide more flexibility but adds unnecessary complexity.
+
+
+### 009: Authentication
+
+Decision: Server-side sessions with secure HTTP-only cookies.
+Why: Simplest authentication model for a browser-based take-home; easy revocation and straightforward ownership checks.
+Alternative: JWT bearer tokens.
+Trade-off: Requires server-side session state, but avoids token lifecycle and revocation complexity.
+
+
+### 010: API Overview
+
+| Method | Endpoint       | Description                    |
+| ------ | -------------- | ------------------------------ |
+| `POST` | `/auth/signup` | Register a user                |
+| `POST` | `/auth/login`  | Login and create a session     |
+| `POST` | `/auth/logout` | Invalidate the current session |
+
+| Method   | Endpoint      | Description                                   |
+| -------- | ------------- | --------------------------------------------- |
+| `POST`   | `/orders`     | Create an order                               |
+| `GET`    | `/orders`     | List user's orders; supports status filtering |
+| `GET`    | `/orders/:id` | Get complete order details                    |
+| `PUT`    | `/orders/:id` | Update an order before first payment          |
+| `DELETE` | `/orders/:id` | Delete an order before first payment          |
+
+| Method | Endpoint               | Description         |
+| ------ | ---------------------- | ------------------- |
+| `POST` | `/orders/:id/payments` | Record a payment    |
+| `GET`  | `/orders/:id/payments` | Get payment history |
+
+### 011: Status Derivation
+
+| Condition                               | Status           |
+| --------------------------------------- | ---------------- |
+| Amount paid = 0 and due date not passed | `pending`        |
+| Amount paid > 0 and amount paid < total | `partially_paid` |
+| Amount paid = total                     | `paid`           |
+| Due date passed and amount paid < total | `overdue`        |
+| Due date passed and amount paid = total |  `paid`          |
+
+
+### 012: Edge Cases & Business Rules
+
+An order must contain at least one line item.
+Quantity must be a positive integer.
+Unit price must be non-negative.
+Order total must be greater than zero.
+Order total is calculated by the server.
+Monetary values are represented internally as integer cents.
+Orders can be edited before the first payment.
+Once a payment exists, customer, due date, and line items become immutable.
+Orders with existing payments cannot be deleted.
+A payment cannot exceed the remaining order balance.
+Concurrent payments for the same order are serialized using row-level protection within a transaction.
+A payment equal to the remaining balance changes the order to paid.
+Past due dates are allowed.
+A due date that is today is not considered overdue.
+Customer is represented as a plain string; there is no separate customer entity.
+Refunds are outside the core scope.
+
+### 013: The current implementation is intentionally scoped for a take-home assignment. Before production, I would consider:
+
+Add comprehensive audit logging for financial operations.
+Add a proper refund/adjustment workflow.
+Add stronger input validation and rate limiting.
+Add CSRF protection where applicable.
+Add structured logging, metrics, tracing, and alerting.
+Add database backup and recovery procedures.
+Add automated migration/deployment workflows.
+Improve authorization and security hardening.
+Add idempotency for payment requests.
+Add more comprehensive concurrency and failure testing.
+Consider pagination and query optimization for larger datasets.
+Add multi-currency support only if the business requires it.
+Add automated integration and end-to-end tests around financial invariants.
