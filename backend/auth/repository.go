@@ -12,6 +12,7 @@ type Repository interface {
 	CreateUser(ctx context.Context, id uuid.UUID, email, passwordHash string) error
 	GetUserCredentials(ctx context.Context, email string) (uuid.UUID, string, error)
 	CreateSession(ctx context.Context, sessionID, userID uuid.UUID) error
+	GetUserIDBySession(ctx context.Context, sessionID uuid.UUID) (uuid.UUID, error)
 }
 
 type repository struct {
@@ -86,4 +87,22 @@ func (r *repository) CreateSession(
 	)
 
 	return err
+}
+
+func (r *repository) GetUserIDBySession(
+	ctx context.Context,
+	sessionID uuid.UUID,
+) (uuid.UUID, error) {
+	var userID uuid.UUID
+
+	err := r.db.QueryRow(
+		ctx,
+		`SELECT user_id
+		 FROM sessions
+		 WHERE id = $1
+		   AND expires_at > NOW()`,
+		sessionID,
+	).Scan(&userID)
+
+	return userID, err
 }
