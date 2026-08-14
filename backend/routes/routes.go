@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"orders-and-settlements-lld-hw/backend/auth"
+
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -20,5 +22,16 @@ func InitializeRoutes(router *gin.Engine, pool *pgxpool.Pool) {
 		})
 	}
 
+	authrRepository := auth.NewRepository(pool)
+	authService := auth.NewService(authrRepository)
+	authHandler := auth.NewController(authService)
+
 	router.GET("/health", healthHandler)
+
+	authRoutes := router.Group("/auth")
+	{
+		authRoutes.POST("/signup", authHandler.Signup)
+		authRoutes.POST("/login", authHandler.Login)
+	}
+
 }
