@@ -57,6 +57,9 @@ func (c *controller) Login(ctx *gin.Context) {
 		return
 	}
 
+	ctx.SetSameSite(http.SameSiteLaxMode)
+
+
 	ctx.SetCookie(
 		"session_id",
 		sessionID.String(),

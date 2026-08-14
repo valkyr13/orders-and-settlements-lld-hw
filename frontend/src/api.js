@@ -60,3 +60,23 @@ export function getOrders() {
 export function getOrder(orderId) {
     return request(`/orders/${orderId}`);
 }
+
+export function createOrder(order) {
+    return request("/orders", {
+        method: "POST",
+        body: JSON.stringify(order),
+    });
+}
+
+export function updateOrder(orderId, order) {
+    return request(`/orders/${orderId}`, {
+        method: "PUT",
+        body: JSON.stringify(order),
+    });
+}
+
+export function deleteOrder(orderId) {
+    return request(`/orders/${orderId}`, {
+        method: "DELETE",
+    });
+}
