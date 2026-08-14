@@ -30,3 +30,6 @@ backend/go.work.sum
 # Editor/IDE
 # .idea/
 .vscode/
+
+frontend/node_modules/*
+frontend/package-lock.json
