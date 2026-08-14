@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type controller struct {
@@ -68,5 +69,14 @@ func (c *controller) Login(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"session_id": sessionID,
+	})
+}
+
+
+func (h *controller) Me(c *gin.Context) {
+	userID := c.MustGet("user_id").(uuid.UUID)
+
+	c.JSON(http.StatusOK, gin.H{
+		"user_id": userID,
 	})
 }

@@ -37,6 +37,7 @@ func InitializeRoutes(router *gin.Engine, pool *pgxpool.Pool) {
 	authService := auth.NewService(authRepository)
 	authController := auth.NewController(authService)
 
+
 	router.GET("/health", healthHandler)
 
 	authRoutes := router.Group("/auth")
@@ -56,6 +57,7 @@ func InitializeRoutes(router *gin.Engine, pool *pgxpool.Pool) {
 
 		protected.POST("/orders/:id/payments", paymentController.CreatePayment)
 		protected.GET("/orders/:id/payments", paymentController.ListPayments)
+		protected.GET("/auth/me", authController.Me)
 
 	}
 }

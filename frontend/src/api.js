@@ -47,3 +47,16 @@ export function login(email, password) {
         }),
     });
 }
+
+export function getCurrentUser() {
+    return request("/auth/me");
+}
+
+
+export function getOrders() {
+    return request("/orders");
+}
+
+export function getOrder(orderId) {
+    return request(`/orders/${orderId}`);
+}

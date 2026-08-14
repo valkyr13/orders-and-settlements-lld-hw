@@ -106,35 +106,37 @@ Trade-off: Requires server-side session state, but avoids token lifecycle and re
 
 ### 012: Edge Cases & Business Rules
 
-An order must contain at least one line item.
-Quantity must be a positive integer.
-Unit price must be non-negative.
-Order total must be greater than zero.
-Order total is calculated by the server.
-Monetary values are represented internally as integer cents.
-Orders can be edited before the first payment.
-Once a payment exists, customer, due date, and line items become immutable.
-Orders with existing payments cannot be deleted.
-A payment cannot exceed the remaining order balance.
-Concurrent payments for the same order are serialized using row-level protection within a transaction.
-A payment equal to the remaining balance changes the order to paid.
-Past due dates are allowed.
-A due date that is today is not considered overdue.
-Customer is represented as a plain string; there is no separate customer entity.
-Refunds are outside the core scope.
+Here are the business rules as a numbered list:
+
+1. An order must contain at least one line item.
+2. Quantity must be a positive integer.
+3. Unit price must be non-negative.
+4. Order total must be greater than zero.
+5. Order total is calculated by the server.
+6. Monetary values are represented internally as integer cents.
+7. Orders can be edited before the first payment.
+8. Once a payment exists, customer, due date, and line items become immutable.
+9. Orders with existing payments cannot be deleted.
+10. A payment cannot exceed the remaining order balance.
+11. Concurrent payments for the same order are serialized using row-level protection within a transaction.
+12. A payment equal to the remaining balance changes the order to paid.
+13. Past due dates are allowed.
+14. A due date that is today is not considered overdue.
+15. Customer is represented as a plain string; there is no separate customer entity.
+16. Refunds are outside the core scope.
 
 ### 013: The current implementation is intentionally scoped for a take-home assignment. Before production, I would consider:
 
-Add comprehensive audit logging for financial operations.
-Add a proper refund/adjustment workflow.
-Add stronger input validation and rate limiting.
-Add CSRF protection where applicable.
-Add structured logging, metrics, tracing, and alerting.
-Add database backup and recovery procedures.
-Add automated migration/deployment workflows.
-Improve authorization and security hardening.
-Add idempotency for payment requests.
-Add more comprehensive concurrency and failure testing.
-Consider pagination and query optimization for larger datasets.
-Add multi-currency support only if the business requires it.
-Add automated integration and end-to-end tests around financial invariants.
+1. Add comprehensive audit logging for financial operations.
+2. Add a proper refund/adjustment workflow.
+3. Add stronger input validation and rate limiting.
+4. Add CSRF protection where applicable.
+5. Add structured logging, metrics, tracing, and alerting.
+6. Add database backup and recovery procedures.
+7. Add automated migration/deployment workflows.
+8. Improve authorization and security hardening.
+9. Add idempotency for payment requests.
+10. Add more comprehensive concurrency and failure testing.
+11. Consider pagination and query optimization for larger datasets.
+12. Add multi-currency support only if the business requires it.
+13. Add automated integration and end-to-end tests around financial invariants.
