@@ -1,3 +1,274 @@
+# Orders & Settlements — Local Setup
+
+## Prerequisites
+
+Install:
+
+* Docker
+* Docker Compose
+* Node.js 18+
+* npm
+
+Go is **not required** to run the backend because it runs inside Docker.
+
+---
+
+## Project Structure
+
+```text
+orders-and-settlements-lld-hw/
+├── backend/
+│   ├── main.go
+│   ├── routes/
+│   ├── internal/
+│   ├── migrations/
+│   ├── go.mod
+│   ├── go.sum
+│   ├── Dockerfile
+│   └── docker-compose.yml
+│
+└── frontend/
+    ├── src/
+    ├── index.html
+    ├── package.json
+    └── vite.config.js
+```
+
+---
+
+# 1. Start the Backend
+
+Open a terminal:
+
+```bash
+cd orders-and-settlements-lld-hw/backend
+```
+
+Start the backend and PostgreSQL:
+
+```bash
+docker compose up --build
+```
+
+This starts:
+
+```text
+PostgreSQL
+    ↓
+Gin Backend
+```
+
+The backend should be available at:
+
+```text
+http://localhost:8080
+```
+
+### Health Check
+
+```bash
+curl http://localhost:8080/health
+```
+
+Expected:
+
+```json
+{
+  "status": "ok"
+}
+```
+
+Keep this terminal running.
+
+---
+
+# 2. Start the Frontend
+
+Open a **second terminal**.
+
+```bash
+cd orders-and-settlements-lld-hw/frontend
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Start Vite:
+
+```bash
+npm run dev
+```
+
+Vite will show something similar to:
+
+```text
+Local: http://localhost:5173/
+```
+
+Open:
+
+```text
+http://localhost:5173
+```
+
+---
+
+# 3. Verify Authentication
+
+The frontend communicates with:
+
+```text
+Frontend
+http://localhost:5173
+        ↓
+Backend
+http://localhost:8080
+```
+
+### Create an account
+
+From the UI:
+
+```text
+Create Account
+    ↓
+Enter email + password
+    ↓
+Sign Up
+```
+
+### Login
+
+Then:
+
+```text
+Login
+    ↓
+Enter credentials
+    ↓
+Login
+```
+
+The backend creates a `session_id` cookie.
+
+---
+
+# 4. Verify the Session
+
+After logging in, the frontend calls:
+
+```text
+GET /auth/me
+```
+
+You can also test the backend directly:
+
+```bash
+curl -i \
+  -b cookies.txt \
+  http://localhost:8080/auth/me
+```
+
+A successful response should be:
+
+```text
+200 OK
+```
+
+---
+
+# 5. Development Workflow
+
+Whenever you change **backend code**:
+
+```bash
+docker compose up --build
+```
+
+Whenever you change **frontend code**, Vite automatically reloads the application.
+
+Frontend:
+
+```bash
+npm run dev
+```
+
+Backend:
+
+```bash
+docker compose up --build
+```
+
+---
+
+# 6. Stop Everything
+
+### Backend
+
+Press:
+
+```text
+Ctrl+C
+```
+
+or:
+
+```bash
+docker compose down
+```
+
+### Frontend
+
+Press:
+
+```text
+Ctrl+C
+```
+
+---
+
+# 7. Reset the Database
+
+⚠️ This deletes all PostgreSQL data.
+
+```bash
+docker compose down -v
+docker compose up --build
+```
+
+The database will be recreated and the initialization migrations will run again.
+
+---
+
+## Quick Start
+
+Once the project is already set up, running the application requires two terminals:
+
+### Terminal 1 — Backend
+
+```bash
+cd backend
+docker compose up --build
+```
+
+### Terminal 2 — Frontend
+
+```bash
+cd frontend
+npm run dev
+```
+
+Then open:
+
+```text
+http://localhost:5173
+```
+
+
+
 # Architecture Decision Log
 
 ## 001: Order Mutability After Payment
