@@ -12,21 +12,21 @@
 *.test
 
 # Code coverage profiles and other test artifacts
-*.out
-coverage.*
-*.coverprofile
-profile.cov
+backend/*.out
+backend/coverage.*
+backend/*.coverprofile
+backend/profile.cov
 
 # Dependency directories (remove the comment below to include it)
 backend/vendor/*
 
 # Go workspace file
-go.work
-go.work.sum
+backend/go.work
+backend/go.work.sum
 
 # env file
 .env
 
 # Editor/IDE
 # .idea/
-# .vscode/
+.vscode/
