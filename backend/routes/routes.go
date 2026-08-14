@@ -2,6 +2,9 @@ package routes
 
 import (
 	"orders-and-settlements-lld-hw/backend/auth"
+	"orders-and-settlements-lld-hw/backend/middleware"
+	"orders-and-settlements-lld-hw/backend/orders"
+	"orders-and-settlements-lld-hw/backend/payments"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -22,16 +25,37 @@ func InitializeRoutes(router *gin.Engine, pool *pgxpool.Pool) {
 		})
 	}
 
-	authrRepository := auth.NewRepository(pool)
-	authService := auth.NewService(authrRepository)
-	authHandler := auth.NewController(authService)
+	orderRepo := orders.NewRepository(pool)
+	orderService := orders.NewService(orderRepo)
+	orderController := orders.NewController(orderService)
+
+	paymentRepo := payments.NewRepository(pool)
+	paymentService := payments.NewService(paymentRepo)
+	paymentController := payments.NewController(paymentService)
+
+	authRepository := auth.NewRepository(pool)
+	authService := auth.NewService(authRepository)
+	authController := auth.NewController(authService)
 
 	router.GET("/health", healthHandler)
 
 	authRoutes := router.Group("/auth")
 	{
-		authRoutes.POST("/signup", authHandler.Signup)
-		authRoutes.POST("/login", authHandler.Login)
+		authRoutes.POST("/signup", authController.Signup)
+		authRoutes.POST("/login", authController.Login)
 	}
 
+	protected := router.Group("/")
+	protected.Use(middleware.RequireAuth(authRepository))
+	{
+		protected.POST("/orders", orderController.CreateOrder)
+		protected.GET("/orders", orderController.ListOrders)
+		protected.GET("/orders/:id", orderController.GetOrder)
+		protected.PUT("/orders/:id", orderController.UpdateOrder)
+		protected.DELETE("/orders/:id", orderController.DeleteOrder)
+
+		protected.POST("/orders/:id/payments", paymentController.CreatePayment)
+		protected.GET("/orders/:id/payments", paymentController.ListPayments)
+
+	}
 }

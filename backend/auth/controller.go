@@ -56,6 +56,16 @@ func (c *controller) Login(ctx *gin.Context) {
 		return
 	}
 
+	ctx.SetCookie(
+		"session_id",
+		sessionID.String(),
+		86400,
+		"/",
+		"",
+		false,
+		true,
+	)
+
 	ctx.JSON(http.StatusOK, gin.H{
 		"session_id": sessionID,
 	})
